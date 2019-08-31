@@ -33,21 +33,6 @@ public class MainActivity extends AppCompatActivity {
         initView();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        GoogleSignInAccount alreadyloggedAccount = GoogleSignIn.getLastSignedInAccount(this);
-
-        if (alreadyloggedAccount != null) {
-            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
-            Log.d("<>", alreadyloggedAccount.getEmail()
-                    + "\n\n" + alreadyloggedAccount.getId()
-                    + "\n\n" + alreadyloggedAccount.getIdToken());
-        } else {
-            Toast.makeText(this, "Not Logged In", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     private void initGoogleLogin() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -59,21 +44,41 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         txtResult = findViewById(R.id.txtResult);
         btnLogin = findViewById(R.id.btnLogin);
-        btnLogin.setOnClickListener(v -> onGoogleLogin());
+        btnLogin.setOnClickListener(v -> {
+            checkIsAlreadyLogin();
+            onGoogleLogin();
+        });
     }
 
+    private void checkIsAlreadyLogin() {
+        GoogleSignInAccount alreadyloggedAccount = GoogleSignIn.getLastSignedInAccount(this);
+
+        if (alreadyloggedAccount != null) {
+            Toast.makeText(this, "Already Logged In, will auto logout for you", Toast.LENGTH_LONG).show();
+            Log.d("<>", alreadyloggedAccount.getEmail()
+                    + "\n\n" + alreadyloggedAccount.getId()
+                    + "\n\n" + alreadyloggedAccount.getIdToken());
+
+            autoLogout();
+        } else {
+            Toast.makeText(this, "Not Logged In, please choose an account to login", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void autoLogout() {
+        googleSignInClient.signOut().addOnSuccessListener(aVoid -> updateTxtResult(""));
+    }
 
     private void onGoogleLogin() {
         Intent signInIntent = googleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, REQUEST_CODE_GOOGLE_LOGIN_IN);
     }
 
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_GOOGLE_LOGIN_IN) {
-
+        Log.d("<>", "onActivityResult code: " + resultCode);
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_GOOGLE_LOGIN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
