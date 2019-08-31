@@ -37,8 +37,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         GoogleSignInAccount alreadyloggedAccount = GoogleSignIn.getLastSignedInAccount(this);
+
         if (alreadyloggedAccount != null) {
             Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
+            Log.d("<>", alreadyloggedAccount.getEmail()
+                    + "\n\n" + alreadyloggedAccount.getId()
+                    + "\n\n" + alreadyloggedAccount.getIdToken());
         } else {
             Toast.makeText(this, "Not Logged In", Toast.LENGTH_SHORT).show();
         }
@@ -59,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void onGoogleLogin(){
+    private void onGoogleLogin() {
         Intent signInIntent = googleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, REQUEST_CODE_GOOGLE_LOGIN_IN);
     }
@@ -89,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void updateTxtResult(String result){
+    private void updateTxtResult(String result) {
         txtResult.setText(result);
     }
 }
